@@ -1,5 +1,7 @@
 package com.hisuperaman.wallety.ui.screens.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.InsertDriveFile
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Mail
@@ -27,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -41,6 +45,7 @@ import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
 import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
 import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
 import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
+import androidx.core.net.toUri
 
 
 @Composable
@@ -91,6 +96,7 @@ fun SettingsScreen(
 ) {
     val accountState by accountViewModel.state.collectAsState()
     var showThemeDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -115,16 +121,31 @@ fun SettingsScreen(
             onClick = { onBackupRestoreClick() }
         )
         SettingsItem(
+            imageVector = Icons.Default.PrivacyTip,
+            title = "Privacy Policy",
+            description = "Read privacy policy.",
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/privacy-policy.html".toUri())
+                context.startActivity(intent)
+            }
+        )
+        SettingsItem(
             imageVector = Icons.AutoMirrored.Outlined.InsertDriveFile,
-            title = "Terms and Privacy Policy",
+            title = "Terms and Conditions",
             description = "Read terms and conditions.",
-            onClick = {ToastManager.show("Coming soon")}
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/terms-and-conditions.html".toUri())
+                context.startActivity(intent)
+            }
         )
         SettingsItem(
             imageVector = Icons.Outlined.Mail,
-            title = stringResource(R.string.contact),
+            title = "Support",
             description = stringResource(R.string.contact_desc),
-            onClick = {ToastManager.show("Coming soon")}
+            onClick = {
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/support.html".toUri())
+                context.startActivity(intent)
+            }
         )
     }
 
