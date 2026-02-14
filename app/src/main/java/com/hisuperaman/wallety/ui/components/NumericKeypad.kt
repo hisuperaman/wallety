@@ -1,5 +1,6 @@
 package com.hisuperaman.wallety.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +17,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.Layout
@@ -36,13 +42,17 @@ import com.hisuperaman.wallety.ui.theme.SoftPeach
 fun KeypadButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
     text: String? = "",
     imageVector: ImageVector? = null,
+    longPressImageVector: ImageVector? = null,
     bgColor: Color? = null,
     outline: Boolean = true
 ) {
     val contentColor =
         if (bgColor == null) (if (outline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary) else Color.Black
+    var isLongPressed by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(if (onLongClick!=null && isLongPressed) 1.6f else 1f)
 
     ActionButtonBase(
         onClick = onClick,
@@ -50,6 +60,13 @@ fun KeypadButton(
         outline = outline,
         roundedCornerPercentage = 25,
         bgColor = bgColor,
+        onLongPress = {
+            isLongPressed = true
+        },
+        onLongPressReleased = {
+            isLongPressed = false
+            onLongClick?.invoke()
+        }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -57,9 +74,11 @@ fun KeypadButton(
         ) {
             if (imageVector != null) {
                 Icon(
-                    imageVector = imageVector,
+                    imageVector = if (isLongPressed && longPressImageVector != null) longPressImageVector else imageVector,
                     contentDescription = null,
-                    tint = contentColor
+                    tint = contentColor,
+                    modifier = Modifier
+                        .scale(scale)
                 )
                 if (text != null) Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacer_sm)))
             }
@@ -168,7 +187,9 @@ fun NumericKeypad(
             GridItem(0, 3) {
                 KeypadButton(
                     imageVector = Icons.Default.Clear,
+                    longPressImageVector = if (showDeleteKey) Icons.Default.DeleteOutline else null,
                     onClick = { onBackspaceClick() },
+                    onLongClick = if (showDeleteKey) ({ onDeleteClick() }) else null,
                     bgColor = SoftPeach,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -233,36 +254,29 @@ fun NumericKeypad(
                     modifier = Modifier.fillMaxWidth()
                 )
             },
-            GridItem(3, 2) {
+            GridItem(3, 0) {
                 KeypadButton(
                     imageVector = Icons.Default.AddComment,
                     onClick = { onCommentClick() },
                     modifier = Modifier.fillMaxWidth(),
                     bgColor = SoftGreen
                 )
-            }) + if (showDeleteKey) {
-            listOf(GridItem(3, 0) {
-                KeypadButton(
-                    imageVector = Icons.Default.DeleteOutline,
-                    onClick = { onDeleteClick() },
-                    modifier = Modifier.fillMaxWidth(),
-                    bgColor = SoftPeach
-                )
-            }, GridItem(3, 1) {
+            },
+            GridItem(3, 1) {
                 KeypadButton(
                     text = "0",
                     onClick = { onKeyClick("0") },
                     modifier = Modifier.fillMaxWidth()
                 )
-            })
-        }
-        else listOf(GridItem(3, 0, colSpan = 2) {
-            KeypadButton(
-                text = "0",
-                onClick = { onKeyClick("0") },
-                modifier = Modifier.fillMaxWidth()
-            )
-        })
+            },
+            GridItem(3, 2) {
+                KeypadButton(
+                    text = ".",
+                    onClick = { onKeyClick(".") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        )
     )
 
 }

@@ -7,7 +7,7 @@ val Background = Color(0xFFFFFFFF)
 val CardBackground = Color(0xFFF5F5F5)
 val PrimaryBlack = Color(0xFF000000)
 
-val SoftPeach = Color(0xFFFEE0D6)
+val SoftPeach = Color(0xFFFFCFC0)
 val SoftBlue = Color(0xFFE2ECFF)
 val SoftYellow = Color(0xFFFDF0B9)
 val SoftGreen = Color(0xFFC6FFC5)

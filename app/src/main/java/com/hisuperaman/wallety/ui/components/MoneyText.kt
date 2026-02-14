@@ -16,6 +16,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.hisuperaman.wallety.data.model.TransactionType
+import com.hisuperaman.wallety.data.toRupees
 import com.hisuperaman.wallety.ui.theme.AdaptiveGreen
 import com.hisuperaman.wallety.ui.theme.AdaptiveRed
 import com.hisuperaman.wallety.ui.theme.SoftGreen
@@ -31,8 +32,10 @@ fun MoneyText(
     style: TextStyle = MaterialTheme.typography.titleMedium,
     fontWeight: FontWeight = MaterialTheme.typography.titleMedium.fontWeight ?: FontWeight.Normal
 ) {
-    val formatter = NumberFormat.getCurrencyInstance()
-    val formattedAmount = formatter.format(amount)
+    val formatter = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+    formatter.minimumFractionDigits = 2
+    formatter.maximumFractionDigits = 2
+    val formattedAmount = formatter.format(amount.toRupees())
 
     val color = when (transactionType) {
         TransactionType.INCOME -> AdaptiveGreen

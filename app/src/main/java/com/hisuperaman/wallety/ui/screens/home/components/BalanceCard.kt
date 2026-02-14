@@ -1,7 +1,5 @@
 package com.hisuperaman.wallety.ui.screens.home.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,17 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -37,25 +27,22 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.hisuperaman.wallety.R
-import com.hisuperaman.wallety.ui.components.InputConfirmationDialog
+import com.hisuperaman.wallety.data.getFormattedExpensePercent
 import com.hisuperaman.wallety.ui.components.MoneyText
+import com.hisuperaman.wallety.ui.theme.AdaptiveGreen
 import com.hisuperaman.wallety.ui.theme.AdaptiveRed
-import com.hisuperaman.wallety.ui.viewmodel.AccountEvent
 import com.hisuperaman.wallety.ui.viewmodel.AccountState
-import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
-import java.text.NumberFormat
-import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BalanceCard(
     state: AccountState,
+    expensePercentChange: Double,
     modifier: Modifier = Modifier
 ) {
-    val profit = "-12.4%"
+    val color = if (expensePercentChange > 0) AdaptiveRed else AdaptiveGreen
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
@@ -85,8 +72,8 @@ fun BalanceCard(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = AdaptiveRed)) {
-                            append("$profit ")
+                        withStyle(style = SpanStyle(color = color)) {
+                            append("${getFormattedExpensePercent(expensePercentChange)} ")
                         }
                         append(stringResource(R.string.last_month))
                     },

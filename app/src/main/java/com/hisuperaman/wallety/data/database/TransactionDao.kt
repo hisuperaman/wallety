@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
+import com.hisuperaman.wallety.data.model.MonthTotals
 import com.hisuperaman.wallety.data.model.Transaction
 import com.hisuperaman.wallety.data.model.TransactionType
 import com.hisuperaman.wallety.data.model.YearRange
@@ -49,8 +50,18 @@ interface TransactionDao {
     suspend fun clearAll()
 
     @Query("""
-        SELECT SUM(amount) FROM `transaction`
-        WHERE date BETWEEN :start AND :end
-    """)
-    fun getLastMonthTotal(start: Long, end: Long): Flow<Double>
+SELECT 
+  SUM(CASE 
+        WHEN strftime('%m', date/1000, 'unixepoch') = strftime('%m', 'now')
+         AND strftime('%Y', date/1000, 'unixepoch') = strftime('%Y', 'now')
+        THEN amount ELSE 0 END) AS thisMonth,
+
+  SUM(CASE 
+        WHEN strftime('%m', date/1000, 'unixepoch') = strftime('%m', 'now','-1 month')
+         AND strftime('%Y', date/1000, 'unixepoch') = strftime('%Y', 'now','-1 month')
+        THEN amount ELSE 0 END) AS lastMonth
+FROM `transaction`
+WHERE type = :type
+""")
+    fun getMonthTotals(type: TransactionType): Flow<MonthTotals>
 }

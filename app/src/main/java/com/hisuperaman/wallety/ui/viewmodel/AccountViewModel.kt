@@ -3,7 +3,9 @@ package com.hisuperaman.wallety.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hisuperaman.wallety.data.database.AccountRepository
+import com.hisuperaman.wallety.data.isValidMoney
 import com.hisuperaman.wallety.data.model.Account
+import com.hisuperaman.wallety.data.toPaise
 import com.hisuperaman.wallety.ui.components.ToastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,7 +73,6 @@ class AccountViewModel @Inject constructor (
     }
 
     private fun setBalance(balance: String) {
-        // TODO: make balance and amount with decimals
         val newBalance = balance.toLongOrNull()
         when {
             newBalance == null -> ToastManager.show("Please enter a valid number")
@@ -88,16 +89,18 @@ class AccountViewModel @Inject constructor (
     }
 
     private fun saveAccount(balance: String) {
-        // TODO: make balance and amount with decimals
-        val newBalance = balance.toLongOrNull()
+        if (!balance.isValidMoney()) {
+            ToastManager.show("Please enter valid money")
+            return
+        }
+        val newBalance = balance.toPaise()
         when {
-            newBalance == null -> ToastManager.show("Please enter a valid number")
             newBalance < 0 -> ToastManager.show("Balance cannot be negative")
             newBalance.toString().length > 9 -> ToastManager.show("Balance too large (max 9 digits)")
             else -> {
                 val acc = account.value ?: return
                 viewModelScope.launch {
-                    repository.upsertAccount(acc.copy(balance = balance.toLong()))
+                    repository.upsertAccount(acc.copy(balance = newBalance))
                 }
             }
         }

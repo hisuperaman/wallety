@@ -35,6 +35,7 @@ import com.hisuperaman.wallety.ui.screens.settings.BackupRestoreScreen
 import com.hisuperaman.wallety.ui.screens.settings.SettingsScreen
 import com.hisuperaman.wallety.ui.screens.transactions.TransactionsScreen
 import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
+import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
 import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
 import com.hisuperaman.wallety.ui.viewmodel.TransactionViewModel
 
@@ -189,6 +190,7 @@ fun AppNavHost(
                             navController.getBackStackEntry("main_graph")
                         }
                         val driveViewModel = hiltViewModel<DriveViewModel>(parentEntry)
+                        val backupScheduleViewModel = hiltViewModel<BackupScheduleViewModel>(parentEntry)
 
                         AppScaffold(
                             title = currentScreenTitle,
@@ -198,7 +200,8 @@ fun AppNavHost(
                             canNavigate = true
                         ) {
                             BackupRestoreScreen(
-                                driveViewModel = driveViewModel
+                                driveViewModel = driveViewModel,
+                                backupScheduleViewModel = backupScheduleViewModel
                             )
                         }
                     }

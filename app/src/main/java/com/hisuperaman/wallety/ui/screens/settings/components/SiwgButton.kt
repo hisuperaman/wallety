@@ -39,6 +39,7 @@ fun SiwgButton(
             onEvent(DriveEvent.SignUp(account, context))
             ToastManager.show("Signed in as ${account.email}")
         } catch (e: ApiException) {
+            Log.e("error", "Sign-in failed: ${e.statusCode} - ${e.message}")
             ToastManager.show("Sign-in failed")
             onEvent(DriveEvent.SignUpFail)
         }

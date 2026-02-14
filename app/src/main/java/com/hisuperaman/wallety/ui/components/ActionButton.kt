@@ -35,6 +35,8 @@ import com.hisuperaman.wallety.R
 fun ActionButtonBase(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongPressReleased: (() -> Unit)? = null,
+    onLongPress: (() -> Unit)? = null,
     outline: Boolean = false,
     roundedCornerPercentage: Int = 50,
     bgColor: Color? = null,
@@ -43,6 +45,7 @@ fun ActionButtonBase(
     val backgroundColor = bgColor
         ?: if (!outline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
     var pressed by remember { mutableStateOf(false) }
+    var isLongPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (pressed) 0.95f else 1f)
 
     Box(
@@ -52,11 +55,19 @@ fun ActionButtonBase(
             .background(backgroundColor)
             .pointerInput(Unit) {
                 detectTapGestures(
+                    onLongPress = {
+                        isLongPressed = true
+                        onLongPress?.invoke()
+                    },
                     onPress = {
                         pressed = true
                         val released = tryAwaitRelease()
+                        if (released) {
+                            if (isLongPressed)onLongPressReleased?.invoke()
+                            else onClick()
+                        }
                         pressed = false
-                        if (released) onClick()
+                        isLongPressed = false
                     }
                 )
             }

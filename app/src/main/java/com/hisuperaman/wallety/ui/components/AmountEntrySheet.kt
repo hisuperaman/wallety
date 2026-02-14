@@ -18,6 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,8 +33,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hisuperaman.wallety.R
+import com.hisuperaman.wallety.data.MAX_COMMENT_LENGTH
 import com.hisuperaman.wallety.data.model.Category
 import com.hisuperaman.wallety.data.model.PaymentType
+import com.hisuperaman.wallety.data.toRupees
 import com.hisuperaman.wallety.ui.theme.SoftBlue
 import com.hisuperaman.wallety.ui.viewmodel.TransactionEvent
 import com.hisuperaman.wallety.ui.viewmodel.TransactionState
@@ -43,19 +48,7 @@ class CurrencyVisualTransformation(
     private val symbol: String
 ) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val digits = text.text.filter { it.isDigit() }
-//        val annotated = buildAnnotatedString {
-//            withStyle(
-//                SpanStyle(fontSize = 20.sp)
-//            ) {
-//                append(symbol)
-//            }
-//            withStyle(
-//                SpanStyle(fontSize = 36.sp)
-//            ) {
-//                append(digits)
-//            }
-//        }
+        val digits = text.text.filter { it.isDigit() || it=='.' }
         val display = if (digits.isEmpty()) symbol else "$symbol$digits"
         val offsetMap = object : OffsetMapping {
             override fun originalToTransformed(offset: Int) =
@@ -223,8 +216,10 @@ fun AmountEntrySheet(
     InputConfirmationDialog(
         showDialog = state.isCommentDialogVisible,
         title = "Comment",
-        message = "Enter a comment:",
+        message = "Add a comment",
+        placeholder = "Write a comment here",
         inputText = state.comment,
+        maxCharCounter = MAX_COMMENT_LENGTH,
         onConfirm = {
             onEvent(TransactionEvent.SetComment(it))
             onEvent(TransactionEvent.HideCommentDialog)

@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.hisuperaman.wallety.data.database.AccountDao
 import com.hisuperaman.wallety.data.database.AccountRepository
 import com.hisuperaman.wallety.data.database.AppDatabase
+import com.hisuperaman.wallety.data.database.BackupScheduleDao
+import com.hisuperaman.wallety.data.database.BackupScheduleRepository
 import com.hisuperaman.wallety.data.database.TransactionDao
 import com.hisuperaman.wallety.data.database.TransactionRepository
 import dagger.Module
@@ -36,4 +38,10 @@ object AppModule {
 
     @Provides
     fun providesTransactionRepository(dao: TransactionDao) = TransactionRepository(dao)
+
+    @Provides
+    fun providesBackupScheduleDao(db: AppDatabase): BackupScheduleDao = db.backupScheduleDao()
+
+    @Provides
+    fun providesBackupScheduleRepository(dao: BackupScheduleDao) = BackupScheduleRepository(dao)
 }

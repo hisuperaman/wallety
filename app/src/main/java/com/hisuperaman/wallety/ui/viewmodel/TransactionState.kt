@@ -38,5 +38,5 @@ data class TransactionState(
 
     val summary: TransactionSummary = TransactionSummary(0, 0, 0),
 
-    val lastMonthProfit: Double = 0.0
+    val expensePercentChange: Double = 100.0
 )

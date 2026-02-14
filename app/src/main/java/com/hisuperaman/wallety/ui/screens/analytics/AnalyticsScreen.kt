@@ -36,6 +36,7 @@ import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.data.getDailyExpenses
 import com.hisuperaman.wallety.data.getDaysInMonth
 import com.hisuperaman.wallety.data.model.TransactionType
+import com.hisuperaman.wallety.data.toRupees
 import com.hisuperaman.wallety.ui.components.FilterBar
 import com.hisuperaman.wallety.ui.theme.SoftBlue
 import com.hisuperaman.wallety.ui.theme.SoftGreen
@@ -99,11 +100,11 @@ fun AnalyticsScreen(
 
         val income = weekTransactions
             .filter { it.type == TransactionType.INCOME }
-            .sumOf { it.amount.toDouble() }
+            .sumOf { it.amount.toRupees() }
 
         val expense = weekTransactions
             .filter { it.type == TransactionType.EXPENSE }
-            .sumOf { it.amount.toDouble() }
+            .sumOf { it.amount.toRupees() }
 
         Bars(
             label = "Week $weekIndex",
@@ -130,7 +131,7 @@ fun AnalyticsScreen(
                 .map { (category, txs) ->
                     Pie(
                         label = category.label, // or category.title
-                        data = txs.sumOf { it.amount.toDouble() },
+                        data = txs.sumOf { it.amount.toRupees() },
                         color = category.color, // or pick a color map
                         selectedColor = category.color
                     )
@@ -149,7 +150,7 @@ fun AnalyticsScreen(
                         values = listOf(
                             Bars.Data(
                                 label = category.label,
-                                value = txs.sumOf { it.amount }.toDouble(),
+                                value = txs.sumOf { it.amount }.toRupees(),
                                 color = SolidColor(category.color)
                             )
                         )
@@ -158,7 +159,11 @@ fun AnalyticsScreen(
         )
     }
 
-    val dailyExpensesData = getDailyExpenses(transactionState.transactions, transactionState.filterYear, transactionState.filterMonth)
+    val dailyExpensesData = getDailyExpenses(
+        transactionState.transactions,
+        transactionState.filterYear,
+        transactionState.filterMonth
+    )
 
     FilterBar(
         state = transactionState,
@@ -166,13 +171,20 @@ fun AnalyticsScreen(
         modifier = Modifier.padding(top = 12.dp)
     )
 
-    Column (
+    Column(
         verticalArrangement = Arrangement.spacedBy(32.dp),
         modifier = Modifier
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 100.dp, start = dimensionResource(R.dimen.padding_regular), end = dimensionResource(R.dimen.padding_regular))
+            .padding(
+                bottom = 100.dp,
+                start = dimensionResource(R.dimen.padding_regular),
+                end = dimensionResource(R.dimen.padding_regular)
+            )
     ) {
-        AnalyticsChart(heading = "Income vs Expenses", isVisible = transactionState.filterType == null && weeklyIncomeExpense.isNotEmpty()) {
+        AnalyticsChart(
+            heading = "Income vs Expenses",
+            isVisible = transactionState.filterType == null && weeklyIncomeExpense.isNotEmpty()
+        ) {
             ColumnChart(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,7 +219,10 @@ fun AnalyticsScreen(
             )
         }
 
-        AnalyticsChart(heading = "Top Spending Categories", isVisible = transactionState.filterType != TransactionType.INCOME && barCategoryData.isNotEmpty()) {
+        AnalyticsChart(
+            heading = "Top Spending Categories",
+            isVisible = transactionState.filterType != TransactionType.INCOME && barCategoryData.isNotEmpty()
+        ) {
             RowChart(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -241,7 +256,10 @@ fun AnalyticsScreen(
                 ),
             )
         }
-        AnalyticsChart(heading = "Spending by Category", isVisible = transactionState.filterType != TransactionType.INCOME && categoryData.isNotEmpty()) {
+        AnalyticsChart(
+            heading = "Spending by Category",
+            isVisible = transactionState.filterType != TransactionType.INCOME && categoryData.isNotEmpty()
+        ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -273,7 +291,10 @@ fun AnalyticsScreen(
             }
         }
 
-        AnalyticsChart(heading = "Daily Expenses Trend", isVisible = transactionState.filterType != TransactionType.INCOME && dailyExpensesData.isNotEmpty()) {
+        AnalyticsChart(
+            heading = "Daily Expenses Trend",
+            isVisible = transactionState.filterType != TransactionType.INCOME && dailyExpensesData.isNotEmpty()
+        ) {
             LineChart(
                 labelProperties = LabelProperties(
                     enabled = true,
@@ -295,7 +316,11 @@ fun AnalyticsScreen(
                     .fillMaxWidth()
                     .height(300.dp)
                     .padding(horizontal = 22.dp),
-                data = remember(transactionState.transactions, transactionState.filterYear, transactionState.filterYear) {
+                data = remember(
+                    transactionState.transactions,
+                    transactionState.filterYear,
+                    transactionState.filterYear
+                ) {
                     listOf(
                         Line(
                             label = "Expenses",
@@ -314,7 +339,5 @@ fun AnalyticsScreen(
                 }),
             )
         }
-
-
     }
 }

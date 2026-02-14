@@ -84,6 +84,7 @@ fun HomeScreen(
 
     BalanceCard(
         state = accountState,
+        expensePercentChange = transactionState.expensePercentChange
     )
     ActionBar(
         onDepositClick = { transactionViewModel.onEvent(TransactionEvent.ShowDialog(TransactionType.INCOME)) },

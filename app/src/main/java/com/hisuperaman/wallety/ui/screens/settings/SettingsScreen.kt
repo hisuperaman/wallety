@@ -32,11 +32,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.data.model.ThemeMode
+import com.hisuperaman.wallety.data.toRupees
 import com.hisuperaman.wallety.ui.components.InputConfirmationDialog
 import com.hisuperaman.wallety.ui.components.ToastManager
 import com.hisuperaman.wallety.ui.screens.settings.components.SettingsItem
 import com.hisuperaman.wallety.ui.viewmodel.AccountEvent
 import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
+import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
 import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
 import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
 
@@ -113,15 +115,9 @@ fun SettingsScreen(
             onClick = { onBackupRestoreClick() }
         )
         SettingsItem(
-            imageVector = Icons.Outlined.PrivacyTip,
-            title = stringResource(R.string.privacy_policy),
-            description = stringResource(R.string.privacy_policy_desc),
-            onClick = {ToastManager.show("Coming soon")}
-        )
-        SettingsItem(
             imageVector = Icons.AutoMirrored.Outlined.InsertDriveFile,
-            title = stringResource(R.string.terms_and_conditions),
-            description = stringResource(R.string.terms_and_conditions_desc),
+            title = "Terms and Privacy Policy",
+            description = "Read terms and conditions.",
             onClick = {ToastManager.show("Coming soon")}
         )
         SettingsItem(
@@ -141,13 +137,14 @@ fun SettingsScreen(
 
     InputConfirmationDialog(
         showDialog = accountState.isEditingBalance,
-        title = stringResource(R.string.edit_base_balance),
-        message = "Enter new base balance",
+        title = "Base Balance",
+        message = "Edit base balance",
+        placeholder = "Write new base balance here",
         onConfirm = { input ->
             accountViewModel.onEvent(AccountEvent.SaveAccount(input))
             accountViewModel.onEvent(AccountEvent.HideDialog)
         },
-        inputText = accountState.account?.balance?.toString() ?: "0",
+        inputText = accountState.account?.balance?.toRupees().toString(),
         onDismiss = { accountViewModel.onEvent(AccountEvent.HideDialog) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )

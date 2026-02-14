@@ -5,13 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hisuperaman.wallety.data.MAX_COMMENT_LENGTH
 import com.hisuperaman.wallety.data.database.AccountRepository
 import com.hisuperaman.wallety.data.database.TransactionRepository
+import com.hisuperaman.wallety.data.getPercentChange
+import com.hisuperaman.wallety.data.isValidMoney
 import com.hisuperaman.wallety.data.model.Category
 import com.hisuperaman.wallety.data.model.PaymentType
 import com.hisuperaman.wallety.data.model.Transaction
 import com.hisuperaman.wallety.data.model.TransactionSummary
 import com.hisuperaman.wallety.data.model.TransactionType
+import com.hisuperaman.wallety.data.toPaise
+import com.hisuperaman.wallety.data.toRupees
+import com.hisuperaman.wallety.data.toRupeesString
 import com.hisuperaman.wallety.ui.components.ToastManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,28 +34,32 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.math.exp
 
 
 @HiltViewModel
 class TransactionViewModel @Inject constructor(
     private val repository: TransactionRepository,
     private val accountRepository: AccountRepository
-): ViewModel() {
+) : ViewModel() {
     private val _state = MutableStateFlow(TransactionState())
     private val latestTransactions = repository.getLatestTransactions()
     private val yearRange = repository.getYearRange()
+    private val expensePercentChange = repository.getMonthTotals(TransactionType.EXPENSE)
+        .map { getPercentChange(it.thisMonth, it.lastMonth) }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val state: StateFlow<TransactionState> =
         combine(
             _state,
             latestTransactions,
-            yearRange
-        ) { state, latest, range ->
-            Triple(state, latest, range)
+            yearRange,
+            expensePercentChange
+        ) { state, latest, range, percent ->
+            Quadruple(state, latest, range, percent)
         }
-            .flatMapLatest { (state, latest, range) ->
-                val monthStr = state.filterMonth.toString().padStart(2,'0')
+            .flatMapLatest { (state, latest, range, percent) ->
+                val monthStr = state.filterMonth.toString().padStart(2, '0')
                 val yearStr = state.filterYear.toString()
 
                 repository.getFilteredTransactions(monthStr, yearStr, state.filterType)
@@ -60,7 +70,8 @@ class TransactionViewModel @Inject constructor(
                             latestTransactions = latest,
                             minYear = range.minYear,
                             maxYear = range.maxYear,
-                            summary = summary
+                            summary = summary,
+                            expensePercentChange = percent
                         )
                     }
             }
@@ -72,7 +83,7 @@ class TransactionViewModel @Inject constructor(
 
 
     fun onEvent(event: TransactionEvent) {
-        when(event) {
+        when (event) {
             is TransactionEvent.SetAmount -> setAmount(event.amount)
             is TransactionEvent.SetCategory -> setCategory(event.category)
             is TransactionEvent.SetComment -> setComment(event.comment)
@@ -129,13 +140,17 @@ class TransactionViewModel @Inject constructor(
         val incomeAmount = incomeTransactions.sumOf { it.amount }
         val expenseAmount = expenseTransactions.sumOf { it.amount }
         val monthlyAmount = incomeAmount - expenseAmount
-        val weeklyIncomeTransactions = incomeTransactions.filter { it.date in startOfWeek until endOfWeek }
-        val weeklyExpenseTransactions = expenseTransactions.filter { it.date in startOfWeek until endOfWeek }
+        val weeklyIncomeTransactions =
+            incomeTransactions.filter { it.date in startOfWeek until endOfWeek }
+        val weeklyExpenseTransactions =
+            expenseTransactions.filter { it.date in startOfWeek until endOfWeek }
         val weeklyIncomeAmount = weeklyIncomeTransactions.sumOf { it.amount }
         val weeklyExpenseAmount = weeklyExpenseTransactions.sumOf { it.amount }
         val weeklyAmount = weeklyIncomeAmount - weeklyExpenseAmount
-        val dayIncomeTransactions = weeklyIncomeTransactions.filter { it.date in startOfDay until endOfDay }
-        val dayExpenseTransactions = weeklyExpenseTransactions.filter { it.date in startOfDay until endOfDay }
+        val dayIncomeTransactions =
+            weeklyIncomeTransactions.filter { it.date in startOfDay until endOfDay }
+        val dayExpenseTransactions =
+            weeklyExpenseTransactions.filter { it.date in startOfDay until endOfDay }
         val dayIncomeAmount = dayIncomeTransactions.sumOf { it.amount }
         val dayExpenseAmount = dayExpenseTransactions.sumOf { it.amount }
         val dayAmount = dayIncomeAmount - dayExpenseAmount
@@ -146,7 +161,7 @@ class TransactionViewModel @Inject constructor(
     private fun setFilterType(type: TransactionType?) {
         _state.update {
             it.copy(
-                filterType = if (it.filterType==type) null else type
+                filterType = if (it.filterType == type) null else type
             )
         }
     }
@@ -174,7 +189,7 @@ class TransactionViewModel @Inject constructor(
                 type = type,
                 editingTransaction = transaction,
 
-                amount = transaction?.amount?.toString() ?: "",
+                amount = transaction?.amount?.toRupees()?.toRupeesString() ?: "",
                 comment = transaction?.comment ?: "",
                 paymentType = transaction?.paymentType ?: PaymentType.CASH,
                 category = transaction?.category ?: Category.INCOME,
@@ -257,6 +272,7 @@ class TransactionViewModel @Inject constructor(
     }
 
     private fun setComment(comment: String) {
+        if (comment.length > MAX_COMMENT_LENGTH) return
         _state.update {
             it.copy(
                 comment = comment
@@ -289,32 +305,48 @@ class TransactionViewModel @Inject constructor(
     }
 
     private fun addDigitToAmount(digit: String) {
-        if (_state.value.amount.length>=9) return
+        var newDigit = digit
+        val currentAmount = _state.value.amount
+        if (newDigit == "0") {
+            if (currentAmount.isBlank()) return
+        }
+        if (newDigit == ".") {
+            if (currentAmount.isBlank()) newDigit = "0$newDigit"
+            if (currentAmount.count({ it == '.' }) > 0) return
+        } else {
+            if (!(currentAmount + newDigit).isValidMoney()) return
+        }
+        if (currentAmount.length >= 9) return
 
         _state.update {
             it.copy(
-                amount = it.amount+digit
+                amount = it.amount + newDigit
             )
         }
     }
 
     private fun removeLastDigitFromAmount() {
+        val currentAmount = _state.value.amount
+        val digitCount = if (currentAmount == "0.") 2 else 1
         _state.update {
             it.copy(
-                amount = it.amount.dropLast(1)
+                amount = it.amount.dropLast(digitCount)
             )
         }
     }
 
     private fun deleteTransaction() {
         val transaction = _state.value.editingTransaction
-        if (transaction===null) return
+        if (transaction === null) return
         viewModelScope.launch {
             accountRepository.account.firstOrNull()?.let { account ->
-                val signedAmount = if (transaction.type == TransactionType.INCOME) transaction.amount else -(transaction.amount)
-                accountRepository.upsertAccount(account.copy(
-                    balance = account.balance - signedAmount
-                ))
+                val signedAmount =
+                    if (transaction.type == TransactionType.INCOME) transaction.amount else -(transaction.amount)
+                accountRepository.upsertAccount(
+                    account.copy(
+                        balance = account.balance - signedAmount
+                    )
+                )
             }
 
             repository.deleteTransaction(transaction)
@@ -323,7 +355,8 @@ class TransactionViewModel @Inject constructor(
 
     private fun saveTransaction() {
         val stateValue = _state.value
-        if (stateValue.amount.isBlank() || stateValue.amount.toLongOrNull() == null || stateValue.date == null) return
+        val rawAmount = stateValue.amount.toPaise()
+        if (rawAmount == 0L || stateValue.amount.isBlank() || stateValue.date == null) return
 
         val transaction = _state.value.editingTransaction
         val now = System.currentTimeMillis()
@@ -331,52 +364,58 @@ class TransactionViewModel @Inject constructor(
             viewModelScope.launch {
                 val account = accountRepository.account.firstOrNull() ?: return@launch
 
-                val signedAmount = if (stateValue.type == TransactionType.INCOME) stateValue.amount.toLong() else -(stateValue.amount.toLong())
-                val newBalance = account.balance+signedAmount
-                // TODO: make balance and amount with decimals
+                val signedAmount =
+                    if (stateValue.type == TransactionType.INCOME) rawAmount else -(rawAmount)
+                val newBalance = account.balance + signedAmount
                 when {
                     newBalance < 0 -> ToastManager.show("Insufficient balance")
                     newBalance.toString().length > 9 -> ToastManager.show("Amount is too large")
                     else -> {
-                        accountRepository.upsertAccount(account.copy(
-                            balance = newBalance
-                        ))
+                        accountRepository.upsertAccount(
+                            account.copy(
+                                balance = newBalance
+                            )
+                        )
 
-                        repository.upsertTransaction(Transaction(
-                            amount = stateValue.amount.toLong(),
-                            type = stateValue.type,
-                            comment = stateValue.comment,
-                            paymentType = stateValue.paymentType,
-                            category = stateValue.category,
-                            date = stateValue.date,
-                            createdAt = now,
-                            updatedAt = now
-                        ))
+                        repository.upsertTransaction(
+                            Transaction(
+                                amount = rawAmount,
+                                type = stateValue.type,
+                                comment = stateValue.comment,
+                                paymentType = stateValue.paymentType,
+                                category = stateValue.category,
+                                date = stateValue.date,
+                                createdAt = now,
+                                updatedAt = now
+                            )
+                        )
                     }
                 }
             }
-        }
-        else {
+        } else {
             viewModelScope.launch {
                 val account = accountRepository.account.firstOrNull() ?: return@launch
 
-                val oldSigned = if (transaction.type == TransactionType.INCOME) transaction.amount else -transaction.amount
-                val newSigned = if (stateValue.type == TransactionType.INCOME) stateValue.amount.toLong() else -stateValue.amount.toLong()
+                val oldSigned =
+                    if (transaction.type == TransactionType.INCOME) transaction.amount else -transaction.amount
+                val newSigned =
+                    if (stateValue.type == TransactionType.INCOME) rawAmount else -rawAmount
 
                 val signedAmount = newSigned - oldSigned
-                val newBalance = account.balance+signedAmount
-                // TODO: make balance and amount with decimals
+                val newBalance = account.balance + signedAmount
                 when {
                     newBalance < 0 -> ToastManager.show("Insufficient balance")
                     newBalance.toString().length > 9 -> ToastManager.show("Amount is too large")
                     else -> {
-                        accountRepository.upsertAccount(account.copy(
-                            balance = newBalance
-                        ))
+                        accountRepository.upsertAccount(
+                            account.copy(
+                                balance = newBalance
+                            )
+                        )
 
                         repository.upsertTransaction(
                             transaction.copy(
-                                amount = stateValue.amount.toLong(),
+                                amount = rawAmount,
                                 type = stateValue.type,
                                 comment = stateValue.comment,
                                 paymentType = stateValue.paymentType,
@@ -391,3 +430,10 @@ class TransactionViewModel @Inject constructor(
         }
     }
 }
+
+data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
+)

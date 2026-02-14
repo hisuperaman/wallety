@@ -1,5 +1,6 @@
 package com.hisuperaman.wallety.data.database
 
+import com.hisuperaman.wallety.data.model.MonthTotals
 import com.hisuperaman.wallety.data.model.Transaction
 import com.hisuperaman.wallety.data.model.TransactionType
 import com.hisuperaman.wallety.data.model.YearRange
@@ -34,7 +35,7 @@ class TransactionRepository @Inject constructor(private val transactionDao: Tran
         return transactionDao.getYearRange()
     }
 
-    fun getLastMonthProfit(start: Long, end: Long): Flow<Double> {
-        return transactionDao.getLastMonthTotal(start, end)
+    fun getMonthTotals(transactionType: TransactionType): Flow<MonthTotals> {
+        return transactionDao.getMonthTotals(transactionType)
     }
 }

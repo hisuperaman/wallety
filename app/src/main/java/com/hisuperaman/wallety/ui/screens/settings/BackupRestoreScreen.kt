@@ -1,6 +1,7 @@
 package com.hisuperaman.wallety.ui.screens.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,12 +37,15 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.data.formatFileSize
 import com.hisuperaman.wallety.data.getFormattedTimestamp
+import com.hisuperaman.wallety.data.model.BackupFrequency
 import com.hisuperaman.wallety.data.model.ThemeMode
 import com.hisuperaman.wallety.ui.components.ActionButton
 import com.hisuperaman.wallety.ui.components.ConfirmationDialog
 import com.hisuperaman.wallety.ui.screens.settings.components.SettingsItem
 import com.hisuperaman.wallety.ui.screens.settings.components.SiwgButton
 import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
+import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleEvent
+import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
 import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
 import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
 
@@ -50,7 +54,8 @@ import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
 fun AutoBackupDialog(
     onDismiss: () -> Unit,
     showDialog: Boolean = false,
-    onSelect: (ThemeMode) -> Unit
+    selected: BackupFrequency,
+    onSelect: (BackupFrequency) -> Unit
 ) {
     if (showDialog) {
         AlertDialog(
@@ -58,53 +63,19 @@ fun AutoBackupDialog(
             title = { Text("Choose Backup Frequency") },
             text = {
                 Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-//                            .clickable { onSelect(mode) }
-                    ) {
-                        RadioButton(
-                            selected = false,
-                            onClick = {  }
-                        )
-                        Text("Daily")
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-//                            .clickable { onSelect(mode) }
-                    ) {
-                        RadioButton(
-                            selected = false,
-                            onClick = {  }
-                        )
-                        Text("Weekly")
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-//                            .clickable { onSelect(mode) }
-                    ) {
-                        RadioButton(
-                            selected = false,
-                            onClick = {  }
-                        )
-                        Text("Monthly")
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-//                            .clickable { onSelect(mode) }
-                    ) {
-                        RadioButton(
-                            selected = true,
-                            onClick = {  }
-                        )
-                        Text("Only when I tap 'Back up'")
+                    BackupFrequency.entries.map { backupFrequency ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                            .clickable { onSelect(backupFrequency) }
+                        ) {
+                            RadioButton(
+                                selected = backupFrequency == selected,
+                                onClick = { onSelect(backupFrequency) }
+                            )
+                            Text(backupFrequency.label)
+                        }
                     }
                 }
             },
@@ -121,9 +92,12 @@ fun AutoBackupDialog(
 fun BackupRestoreScreen(
     modifier: Modifier = Modifier,
     driveViewModel: DriveViewModel,
+    backupScheduleViewModel: BackupScheduleViewModel
 ) {
     val webClientId by remember { mutableStateOf("7333842842-33k6ml8bq38kppb0rbobm0e13kfilkcr.apps.googleusercontent.com") }
     val driveState by driveViewModel.state.collectAsState()
+    val backupScheduleState by backupScheduleViewModel.state.collectAsState()
+    val context = LocalContext.current
 
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -182,11 +156,13 @@ fun BackupRestoreScreen(
             state = driveState
         )
 
-        SettingsItem(
-            title = stringResource(R.string.automatic_backups),
-            description = stringResource(R.string.automatic_backups_desc),
-            onClick = {driveViewModel.onEvent(DriveEvent.ShowAutoBackupDialog)}
-        )
+        if (driveState.userEmail != null) {
+            SettingsItem(
+                title = stringResource(R.string.automatic_backups),
+                description = stringResource(R.string.automatic_backups_desc),
+                onClick = { driveViewModel.onEvent(DriveEvent.ShowAutoBackupDialog) }
+            )
+        }
     }
 
     if (driveState.backupLoading || driveState.restoreLoading) {
@@ -230,6 +206,7 @@ fun BackupRestoreScreen(
     AutoBackupDialog(
         showDialog = driveState.isAutoBackupDialogVisible,
         onDismiss = {driveViewModel.onEvent(DriveEvent.HideAutoBackupDialog)},
-        onSelect = {}
+        selected = backupScheduleState.backupFrequency,
+        onSelect = { backupScheduleViewModel.onEvent(BackupScheduleEvent.SaveSchedule(context, it)) }
     )
 }
