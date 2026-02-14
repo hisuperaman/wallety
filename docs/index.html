@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallety - Download</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .phone-frame {
+            width: 280px;
+            height: 570px;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .screen-icon {
+            width: 60px;
+            height: 60px;
+            background: #212529;
+            border-radius: 15px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .screen-text {
+            color: #212529;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .screen-chart {
+            width: 100%;
+            height: 60px;
+            background: #fff;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 10px 5px;
+            gap: 3px;
+        }
+
+        .bar {
+            flex: 1;
+            background: #212529;
+            border-radius: 3px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-900">
+    <!-- Navigation -->
+    <nav class="border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">W</span>
+                </div>
+                <span class="font-semibold text-lg">Wallety</span>
+            </div>
+            <a href="support.html" class="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition">
+                Support
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center">
+        <div class="pt-8 lg:pt-0 max-w-7xl mx-auto px-6 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Left Content -->
+                <div>
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        Take Control of Your Finances with Wallety
+                    </h1>
+
+                    <p class="text-xl text-gray-600 mb-8">
+                        Wallety is a minimal, privacy-first expense tracker that lets you deposit and withdraw money,
+                        categorize transactions, and visualize your spending—all locally or backed up to your Google
+                        Drive.
+                    </p>
+
+                    <!-- Closed Beta Testing Badge -->
+                    <div class="inline-block bg-gray-100 px-4 py-2 rounded-lg mb-8">
+                        <p class="text-sm text-gray-700 font-medium">🔒 Closed Beta Testing</p>
+                    </div>
+
+                    <!-- Download Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                        <button id="downloadAndroidBtn"
+                            class="bg-gray-900 text-white py-4 px-8 rounded-lg font-semibold hover:bg-gray-800 transition transform hover:scale-105">
+                            Download for Android
+                        </button>
+                    </div>
+
+                    <!-- Social Proof -->
+                    <div class="mt-16 pt-8 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 mb-4">Available on Android</p>
+                        <div class="flex gap-8">
+                            <div>
+                                <p class="text-2xl font-bold">4.9★</p>
+                                <p class="text-sm text-gray-600">1+ reviews</p>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold">1+</p>
+                                <p class="text-sm text-gray-600">Active users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right - Phone Mockup -->
+                <div class="flex justify-center lg:justify-end">
+                    <div class="phone-frame overflow-hidden">
+                        <img src="./images/app-screen.jpg" alt="app screenshot" class="object-fill">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div id="downloadModal" class="modal">
+        <div class="modal-content">
+            <!-- Close Button -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Backup Your Data</h2>
+                <button id="closeModalBtn" class="modal-close text-2xl text-gray-500 hover:text-gray-700">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Description -->
+            <p class="text-gray-600 mb-6 leading-relaxed">
+                Wallety is currently in <span class="font-semibold">closed beta testing</span>. If you want to back up your app data to your Google account, please provide your email address. This helps me (the developer) grant you access to the backup feature.
+            </p>
+
+            <!-- Form -->
+            <form id="downloadForm">
+                <div class="mb-6">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="john@doe.com"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                    class="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition mb-4">
+                    Submit Email and Download
+                </button>
+            </form>
+
+            <!-- Download Anyway Link -->
+            <div class="text-center">
+                <button id="downloadAnywayBtn"
+                    class="text-gray-600 hover:text-gray-900 transition font-medium inline-flex items-center gap-2">
+                    <span>Download Anyway</span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white py-12">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-600 mb-2">© 2026 Wallety. All rights reserved.</p>
+            <div class="flex justify-center gap-8 text-sm text-gray-500">
+                <a href="privacy-policy.html" class="hover:text-gray-700 transition">Privacy</a>
+                <a href="terms-and-conditions.html" class="hover:text-gray-700 transition">Terms</a>
+                <a href="support.html" class="hover:text-gray-700 transition">Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const downloadAndroidBtn = document.getElementById('downloadAndroidBtn');
+        const downloadModal = document.getElementById('downloadModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const downloadForm = document.getElementById('downloadForm');
+        const downloadAnywayBtn = document.getElementById('downloadAnywayBtn');
+        const emailInput = document.getElementById('email');
+
+        // Open modal
+        downloadAndroidBtn.addEventListener('click', () => {
+            downloadModal.classList.add('active');
+        });
+
+        // Close modal
+        function closeModal() {
+            downloadModal.classList.remove('active');
+            emailInput.value = '';
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        downloadModal.addEventListener('click', (e) => {
+            if (e.target === downloadModal) {
+                closeModal();
+            }
+        });
+
+        // Handle form submission
+        downloadForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = emailInput.value;
+            console.log('Email submitted:', email);
+            // Here you'll add web3forms action
+            // For now, just trigger download
+            triggerDownload();
+            closeModal();
+        });
+
+        // Download anyway
+        downloadAnywayBtn.addEventListener('click', () => {
+            triggerDownload();
+            closeModal();
+        });
+
+        // Trigger download
+        function triggerDownload() {
+            // Create a temporary link and trigger download
+            const link = document.createElement('a');
+            link.href = '#'; // Replace with actual APK URL
+            link.download = 'wallety.apk';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            console.log('Download started');
+        }
+    </script>
+</body>
+
+</html>
