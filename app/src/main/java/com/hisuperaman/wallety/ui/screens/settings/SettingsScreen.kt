@@ -140,7 +140,7 @@ fun SettingsScreen(
         )
         SettingsItem(
             imageVector = Icons.Outlined.Mail,
-            title = "Support",
+            title = "Contact",
             description = stringResource(R.string.contact_desc),
             onClick = {
                 val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/support.html".toUri())
