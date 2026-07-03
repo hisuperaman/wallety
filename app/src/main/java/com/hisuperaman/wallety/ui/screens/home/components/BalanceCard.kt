@@ -24,10 +24,12 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,94 +74,96 @@ fun BalanceCard(
         label = "overlay"
     )
 
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(dimensionResource(R.dimen.rounded_md)),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(
-                top = dimensionResource(R.dimen.padding_md),
-                start = dimensionResource(R.dimen.padding_regular),
-                end = dimensionResource(R.dimen.padding_regular)
-            ),
-        onClick = { revealed = !revealed }
-    ) {
-        Box(
-            modifier = Modifier
+    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(dimensionResource(R.dimen.rounded_md)),
+            modifier = modifier
+                .fillMaxSize()
                 .padding(
-                    paddingValues = PaddingValues(
-                        top = 64.dp,
-                        start = dimensionResource(R.dimen.padding_md),
-                        end = dimensionResource(R.dimen.padding_md),
-                        bottom = 32.dp
-                    )
-                )
-                .fillMaxWidth()
+                    top = dimensionResource(R.dimen.padding_md),
+                    start = dimensionResource(R.dimen.padding_regular),
+                    end = dimensionResource(R.dimen.padding_regular)
+                ),
+            onClick = { revealed = !revealed }
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_sm)),
-                modifier = Modifier.blur(blur)
+            Box(
+                modifier = Modifier
+                    .padding(
+                        paddingValues = PaddingValues(
+                            top = 64.dp,
+                            start = dimensionResource(R.dimen.padding_md),
+                            end = dimensionResource(R.dimen.padding_md),
+                            bottom = 32.dp
+                        )
+                    )
+                    .fillMaxWidth()
             ) {
-                MoneyText(
-                    amount = state.account?.balance ?: 0,
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = color)) {
-                            append("${getFormattedExpensePercent(expensePercentChange)} ")
-                        }
-                        append(stringResource(R.string.last_month))
-                    },
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.W400
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_sm)),
+                    modifier = Modifier.blur(blur)
+                ) {
+                    MoneyText(
+                        amount = state.account?.balance ?: 0,
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = color)) {
+                                append("${getFormattedExpensePercent(expensePercentChange)} ")
+                            }
+                            append(stringResource(R.string.last_month))
+                        },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.W400
+                    )
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .padding(dimensionResource(R.dimen.padding_sm))
+                            .alpha(0f)
+                    )
+                }
                 Icon(
-                    imageVector = Icons.Default.Edit,
+                    imageVector = Icons.Outlined.AccountBalanceWallet,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .padding(dimensionResource(R.dimen.padding_sm))
-                        .alpha(0f)
+                        .size(64.dp)
+                        .align(Alignment.BottomEnd)
+                        .blur(blur)
                 )
-            }
-            Icon(
-                imageVector = Icons.Outlined.AccountBalanceWallet,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier
-                    .padding(dimensionResource(R.dimen.padding_sm))
-                    .size(64.dp)
-                    .align(Alignment.BottomEnd)
-                    .blur(blur)
-            )
 
-            AnimatedVisibility(
-                visible = !revealed,
-                enter = fadeIn() + scaleIn(
-                    initialScale = 0.8f,
-                    transformOrigin = TransformOrigin(0f, 1f)
-                ),
-                exit = fadeOut() + scaleOut(
-                    targetScale = 0.8f,
-                    transformOrigin = TransformOrigin(0f, 1f)
-                ),
-                modifier = Modifier.matchParentSize()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.15f * overlayAlpha)),
-                    contentAlignment = Alignment.BottomStart
+                AnimatedVisibility(
+                    visible = !revealed,
+                    enter = fadeIn() + scaleIn(
+                        initialScale = 0.8f,
+                        transformOrigin = TransformOrigin(0f, 1f)
+                    ),
+                    exit = fadeOut() + scaleOut(
+                        targetScale = 0.8f,
+                        transformOrigin = TransformOrigin(0f, 1f)
+                    ),
+                    modifier = Modifier.matchParentSize()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Visibility,
-                        contentDescription = "Reveal balance",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.15f * overlayAlpha)),
+                        contentAlignment = Alignment.BottomStart
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Visibility,
+                            contentDescription = "Reveal balance",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
