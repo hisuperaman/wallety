@@ -19,3 +19,21 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep generic type information (required for Gson TypeToken)
+-keepattributes Signature
+
+# Keep runtime annotations
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+
+# Gson
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# Keep your backup model
+-keep class com.hisuperaman.wallety.data.database.BackupData { *; }
+
+# Keep your Room models
+-keep class com.hisuperaman.wallety.data.model.** { *; }
+
+-dontwarn com.google.gson.**
