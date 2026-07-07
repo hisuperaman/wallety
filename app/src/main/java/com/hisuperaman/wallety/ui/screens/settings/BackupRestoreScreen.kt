@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,30 +19,23 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.data.formatFileSize
 import com.hisuperaman.wallety.data.getFormattedTimestamp
 import com.hisuperaman.wallety.data.model.BackupFrequency
-import com.hisuperaman.wallety.data.model.ThemeMode
 import com.hisuperaman.wallety.ui.components.ActionButton
 import com.hisuperaman.wallety.ui.components.ConfirmationDialog
 import com.hisuperaman.wallety.ui.screens.settings.components.SettingsItem
 import com.hisuperaman.wallety.ui.screens.settings.components.SiwgButton
-import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
 import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleEvent
 import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
 import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
@@ -94,7 +86,7 @@ fun BackupRestoreScreen(
     driveViewModel: DriveViewModel,
     backupScheduleViewModel: BackupScheduleViewModel
 ) {
-    val webClientId by remember { mutableStateOf("7333842842-33k6ml8bq38kppb0rbobm0e13kfilkcr.apps.googleusercontent.com") }
+    val webClientId = stringResource(R.string.web_client_id)
     val driveState by driveViewModel.state.collectAsState()
     val backupScheduleState by backupScheduleViewModel.state.collectAsState()
     val context = LocalContext.current

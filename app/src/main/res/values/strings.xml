@@ -8,7 +8,7 @@
     <string name="see_more">See more</string>
     <string name="expenses">Expenses</string>
     <string name="income">Income</string>
-    <string name="add_a_comment">Add a comment...</string>
+    <string name="add_a_comment">Add a comment…</string>
 
     <string name="home">Home</string>
     <string name="transactions">Transactions</string>
@@ -43,4 +43,6 @@
     <string name="google_account_desc">theaman1805@gmail.com</string>
     <string name="automatic_backups">Automatic backups</string>
     <string name="automatic_backups_desc">Only when I tap \'Back up\'</string>
+
+    <string name="web_client_id">7333842842-u374rl7199cg05di3qo96lfbs9fqtq5t.apps.googleusercontent.com</string>
 </resources>

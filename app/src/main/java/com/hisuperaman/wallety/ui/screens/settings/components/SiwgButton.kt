@@ -1,25 +1,22 @@
 package com.hisuperaman.wallety.ui.screens.settings.components
 
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.hisuperaman.wallety.R
-import kotlinx.coroutines.launch
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.ui.components.ToastManager
 import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
 import com.hisuperaman.wallety.ui.viewmodel.DriveState
-import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
+import kotlinx.coroutines.launch
 
 
 @Composable
