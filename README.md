@@ -17,7 +17,7 @@ Wallety is a minimal, privacy-first expense tracker that helps you manage your m
 
 ## Screenshots
 
-![Home Screen](screenshots/home-screen.jpg)
+<img src="screenshots/home-screen.jpg" alt="Home Screen" height="250">
 
 ## Download
 
