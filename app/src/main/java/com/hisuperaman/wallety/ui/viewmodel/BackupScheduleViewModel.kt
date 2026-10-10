@@ -3,7 +3,10 @@ package com.hisuperaman.wallety.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.BackoffPolicy
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.hisuperaman.wallety.data.calculateInitialDelay
@@ -66,6 +69,12 @@ class BackupScheduleViewModel @Inject constructor(
             schedule.backupFrequency.value, TimeUnit.DAYS
         )
             .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 15, TimeUnit.MINUTES)
             .build()
 
         wm.enqueueUniquePeriodicWork(
