@@ -1,7 +1,6 @@
 package com.hisuperaman.wallety.ui.screens.settings
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,9 +13,6 @@ import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Backup
 import androidx.compose.material.icons.outlined.Mail
-import androidx.compose.material.icons.outlined.PrivacyTip
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.StarRate
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.RadioButton
@@ -34,18 +30,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.hisuperaman.wallety.R
 import com.hisuperaman.wallety.data.model.ThemeMode
 import com.hisuperaman.wallety.data.toRupees
 import com.hisuperaman.wallety.ui.components.InputConfirmationDialog
-import com.hisuperaman.wallety.ui.components.ToastManager
 import com.hisuperaman.wallety.ui.screens.settings.components.SettingsItem
 import com.hisuperaman.wallety.ui.viewmodel.AccountEvent
 import com.hisuperaman.wallety.ui.viewmodel.AccountViewModel
-import com.hisuperaman.wallety.ui.viewmodel.BackupScheduleViewModel
-import com.hisuperaman.wallety.ui.viewmodel.DriveEvent
-import com.hisuperaman.wallety.ui.viewmodel.DriveViewModel
-import androidx.core.net.toUri
 
 
 @Composable
@@ -125,7 +117,7 @@ fun SettingsScreen(
             title = "Privacy Policy",
             description = "Read privacy policy.",
             onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/privacy-policy.html".toUri())
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/privacy-policy".toUri())
                 context.startActivity(intent)
             }
         )
@@ -134,7 +126,7 @@ fun SettingsScreen(
             title = "Terms and Conditions",
             description = "Read terms and conditions.",
             onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/terms-and-conditions.html".toUri())
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/terms".toUri())
                 context.startActivity(intent)
             }
         )
@@ -143,7 +135,7 @@ fun SettingsScreen(
             title = "Contact",
             description = stringResource(R.string.contact_desc),
             onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/support.html".toUri())
+                val intent = Intent(Intent.ACTION_VIEW, "https://hisuperaman.me/wallety/support".toUri())
                 context.startActivity(intent)
             }
         )
