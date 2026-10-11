@@ -18,13 +18,25 @@ class BackupHelper(
 
     private suspend fun backupFile(fileName: String, fileContent: String) =
         withContext(Dispatchers.IO) {
-            val metadata = com.google.api.services.drive.model.File().apply {
-                name = fileName
-                parents = listOf("appDataFolder")
-            }
-
             val content = ByteArrayContent.fromString("application/json", fileContent)
-            drive.files().create(metadata, content).execute()
+
+            // Update the existing backup instead of creating a duplicate file on every run
+            val existingId = drive.files().list()
+                .setSpaces("appDataFolder")
+                .setQ("name='$fileName' and trashed=false")
+                .setFields("files(id)")
+                .execute()
+                .files?.firstOrNull()?.id
+
+            if (existingId != null) {
+                drive.files().update(existingId, null, content).execute()
+            } else {
+                val metadata = com.google.api.services.drive.model.File().apply {
+                    name = fileName
+                    parents = listOf("appDataFolder")
+                }
+                drive.files().create(metadata, content).execute()
+            }
         }
 
     private suspend fun backupRoomToJson(): String = withContext(Dispatchers.IO) {

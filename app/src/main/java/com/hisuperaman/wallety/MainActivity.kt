@@ -15,8 +15,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import androidx.work.Configuration
 import com.hisuperaman.wallety.data.database.AccountRepository
 import com.hisuperaman.wallety.data.model.Account
 import com.hisuperaman.wallety.data.model.ThemeMode
@@ -34,8 +36,14 @@ import javax.inject.Inject
 
 
 @HiltAndroidApp
-class WalletyApp : Application() {
+class WalletyApp : Application(), Configuration.Provider {
     @Inject lateinit var repository: AccountRepository
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
